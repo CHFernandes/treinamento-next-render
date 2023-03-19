@@ -1,4 +1,4 @@
-import { GetServerSideProps } from 'next'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import { RichText } from 'prismic-dom'
 import { getPrismicClient } from '../../services/prismic'
@@ -41,13 +41,17 @@ export default function Post({ post }: PostProps) {
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  params,
-}) => {
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: ['/posts/custom-route-handlers'],
+    fallback: 'blocking',
+  }
+}
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { slug } = params as Params
 
-  const prismic = getPrismicClient(req)
+  const prismic = getPrismicClient()
 
   const response = await prismic.getByUID('publication', String(slug), {})
 
@@ -69,5 +73,6 @@ export const getServerSideProps: GetServerSideProps = async ({
     props: {
       post,
     },
+    redirect: 60 * 30, // 30 minutes
   }
 }
